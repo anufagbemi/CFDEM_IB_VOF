@@ -13,11 +13,11 @@ Installation instructions
 
     $HOME/CFDEM_IB_VOF
 
-5. Navigate to your the $HOME/CFDEMcoupling-PUBLIC-5.x/src/lagrangian/cfdemParticle and type 
+5. Navigate to your the $HOME/CFDEM_IB_VOF/CFDEMcoupling-PUBLIC-5.x/src/lagrangian/cfdemParticle and type 
 
     wmake
 
-6. Navigate to to $HOME/CFDEMcoupling-PUBLIC-5.x/applications/solvers/cfdemSolverIB_VOF2
+6. Navigate to to $HOME/CFDEM_IB_VOF/CFDEMcoupling-PUBLIC-5.x/applications/solvers/cfdemSolverIB_VOF2
 and type 
 
     wmake
