@@ -1,0 +1,1 @@
+../subModels/forceModel/checkCouplingInterval/checkCouplingInterval.H

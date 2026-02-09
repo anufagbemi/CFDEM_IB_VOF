@@ -1,0 +1,1 @@
+../subModels/averagingModel/dense/dense.H

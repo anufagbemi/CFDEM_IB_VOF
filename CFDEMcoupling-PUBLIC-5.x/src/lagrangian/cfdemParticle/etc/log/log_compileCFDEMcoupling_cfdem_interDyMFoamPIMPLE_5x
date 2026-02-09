@@ -1,0 +1,36 @@
+
+//   log_compileCFDEMcoupling_cfdem_interDyMFoamPIMPLE_5x_cfdem_interDyMFoamPIMPLE_5x-2019-06-17-17:50   //
+
+/home/anu/CFDEM/CFDEMcoupling-PUBLIC-5.x/applications/solvers/cfdem_interDyMFoamPIMPLE_5x
+
+removing all .dep files ...
+Making dependency list for source file cfdem_interDyMFoamPIMPLE_5x.C
+could not open file fvIOoptionList.H for source file cfdem_interDyMFoamPIMPLE_5x.C due to No such file or directory
+could not open file omp.h for source file cfdem_interDyMFoamPIMPLE_5x.C due to No such file or directory
+could not open file ompi/mpi/cxx/pmpicxx.h for source file cfdem_interDyMFoamPIMPLE_5x.C due to No such file or directory
+could not open file ompi/mpi/cxx/pop_inln.h for source file cfdem_interDyMFoamPIMPLE_5x.C due to No such file or directory
+could not open file ompi/mpi/cxx/pgroup_inln.h for source file cfdem_interDyMFoamPIMPLE_5x.C due to No such file or directory
+could not open file ompi/mpi/cxx/pstatus_inln.h for source file cfdem_interDyMFoamPIMPLE_5x.C due to No such file or directory
+could not open file ompi/mpi/cxx/prequest_inln.h for source file cfdem_interDyMFoamPIMPLE_5x.C due to No such file or directory
+could not open file math.h for source file cfdem_interDyMFoamPIMPLE_5x.C due to No such file or directory
+could not open file cfdemCloudRotation.H for source file cfdem_interDyMFoamPIMPLE_5x.C due to No such file or directory
+could not open file cfdemCloudRotationSuperquadric.H for source file cfdem_interDyMFoamPIMPLE_5x.C due to No such file or directory
+g++ -std=c++11 -m64 -Dlinux64 -DWM_ARCH_OPTION=64 -DWM_DP -DWM_LABEL_SIZE=32 -Wall -Wextra -Wold-style-cast -Wnon-virtual-dtor -Wno-unused-parameter -Wno-invalid-offsetof -O3  -DNoRepository -ftemplate-depth-100 -DOMPI_SKIP_MPICXX -DSUPERQUADRIC_ACTIVE_FLAG -DNONSPHERICAL_ACTIVE_FLAG -DCFDEMWMPROJECTVERSION="50" -I/usr/lib/openmpi/include/openmpi/opal/mca/event/libevent2021/libevent -I/usr/lib/openmpi/include/openmpi/opal/mca/event/libevent2021/libevent/include -I/usr/lib/openmpi/include -I/usr/lib/openmpi/include/openmpi -pthread -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/TurbulenceModels/turbulenceModels/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/TurbulenceModels/incompressible/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/fvOptions/lnInclude  -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/transportModels -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/transportModels/twoPhaseMixture/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/transportModels/incompressible/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/transportModels/interfaceProperties/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/transportModels/immiscibleIncompressibleTwoPhaseMixture/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/TurbulenceModels/turbulenceModels/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/TurbulenceModels/incompressible/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/finiteVolume/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/meshTools/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/fvOptions/lnInclude -I/home/anu/CFDEM/CFDEMcoupling-PUBLIC-5.x/src/lagrangian/cfdemParticle/lnInclude -I/home/anu/CFDEM/CFDEMcoupling-PUBLIC-5.x/src/lagrangian/cfdemParticle/cfdTools -I/home/anu/LIGGGHTS/LIGGGHTS-PUBLIC/src -IlnInclude -I. -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/OpenFOAM/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/OSspecific/POSIX/lnInclude   -fPIC -c cfdem_interDyMFoamPIMPLE_5x.C -o Make/linux64GccDPInt32Opt/cfdem_interDyMFoamPIMPLE_5x.o
+In file included from /home/anu/OpenFOAM/OpenFOAM-5.x/src/OpenFOAM/lnInclude/postProcess.H:129:0,
+                 from cfdem_interDyMFoamPIMPLE_5x.C:87:
+./createFields.H: In function ‘int main(int, char**)’:
+./createFields.H:89:21: warning: unused variable ‘alpha2’ [-Wunused-variable]
+     volScalarField& alpha2(mixture.alpha2());
+                     ^
+cfdem_interDyMFoamPIMPLE_5x.C:162:13: warning: unused variable ‘nCorr’ [-Wunused-variable]
+         int nCorr=(readInt(pimple.dict().lookup("nCorrectors")));
+             ^
+cfdem_interDyMFoamPIMPLE_5x.C:164:13: warning: unused variable ‘nOuterCorr’ [-Wunused-variable]
+         int nOuterCorr =
+             ^
+cfdem_interDyMFoamPIMPLE_5x.C:166:13: warning: unused variable ‘nNonOrthCorr’ [-Wunused-variable]
+         int nNonOrthCorr =
+             ^
+g++ -std=c++11 -m64 -Dlinux64 -DWM_ARCH_OPTION=64 -DWM_DP -DWM_LABEL_SIZE=32 -Wall -Wextra -Wold-style-cast -Wnon-virtual-dtor -Wno-unused-parameter -Wno-invalid-offsetof -O3  -DNoRepository -ftemplate-depth-100 -DOMPI_SKIP_MPICXX -DSUPERQUADRIC_ACTIVE_FLAG -DNONSPHERICAL_ACTIVE_FLAG -DCFDEMWMPROJECTVERSION="50" -I/usr/lib/openmpi/include/openmpi/opal/mca/event/libevent2021/libevent -I/usr/lib/openmpi/include/openmpi/opal/mca/event/libevent2021/libevent/include -I/usr/lib/openmpi/include -I/usr/lib/openmpi/include/openmpi -pthread -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/TurbulenceModels/turbulenceModels/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/TurbulenceModels/incompressible/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/fvOptions/lnInclude  -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/transportModels -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/transportModels/twoPhaseMixture/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/transportModels/incompressible/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/transportModels/interfaceProperties/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/transportModels/immiscibleIncompressibleTwoPhaseMixture/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/TurbulenceModels/turbulenceModels/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/TurbulenceModels/incompressible/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/finiteVolume/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/meshTools/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/fvOptions/lnInclude -I/home/anu/CFDEM/CFDEMcoupling-PUBLIC-5.x/src/lagrangian/cfdemParticle/lnInclude -I/home/anu/CFDEM/CFDEMcoupling-PUBLIC-5.x/src/lagrangian/cfdemParticle/cfdTools -I/home/anu/LIGGGHTS/LIGGGHTS-PUBLIC/src -IlnInclude -I. -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/OpenFOAM/lnInclude -I/home/anu/OpenFOAM/OpenFOAM-5.x/src/OSspecific/POSIX/lnInclude   -fPIC -Xlinker --add-needed -Xlinker --no-as-needed Make/linux64GccDPInt32Opt/cfdem_interDyMFoamPIMPLE_5x.o -L/home/anu/OpenFOAM/OpenFOAM-5.x/platforms/linux64GccDPInt32Opt/lib \
+    -L/home/anu/CFDEM/CFDEMcoupling-PUBLIC-5.x/platforms/linux64GccDPInt32Opt/lib -lturbulenceModels -lincompressibleTurbulenceModels -lfvOptions  -limmiscibleIncompressibleTwoPhaseMixture -lturbulenceModels -lincompressibleTurbulenceModels -lfiniteVolume -lmeshTools -lfvOptions -lsampling -llagrangianCFDEM-PUBLIC-5.x   -lOpenFOAM -ldl  \
+     -lm -o /home/anu/CFDEM/anu-PUBLIC-5.x/platforms/linux64GccDPInt32Opt/bin/cfdem_interDyMFoamPIMPLE_5x

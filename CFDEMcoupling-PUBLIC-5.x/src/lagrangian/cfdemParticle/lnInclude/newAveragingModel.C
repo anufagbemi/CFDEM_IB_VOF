@@ -1,0 +1,1 @@
+../subModels/averagingModel/averagingModel/newAveragingModel.C

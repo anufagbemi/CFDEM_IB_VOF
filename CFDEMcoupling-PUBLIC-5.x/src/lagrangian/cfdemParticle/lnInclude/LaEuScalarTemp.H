@@ -1,0 +1,1 @@
+../subModels/forceModel/LaEuScalarTemp/LaEuScalarTemp.H
