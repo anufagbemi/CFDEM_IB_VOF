@@ -12,7 +12,7 @@ EXE_INC = \
     -I$(LIB_SRC)/transportModels/interfaceProperties/lnInclude \
     -I$(LIB_SRC)/transportModels/incompressible/incompressibleTwoPhaseMixture/lnInclude \
     -I$(LIB_SRC)/transportModels/immiscibleIncompressibleTwoPhaseMixture/lnInclude \
-    -I/home/anu/isoAdvector/OpenFOAM-5.x/src/lnInclude \
+    -I$(HOME)/isoAdvector/OpenFOAM-5.x/src/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(CFDEM_SRC_DIR)/lagrangian/cfdemParticle/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
@@ -24,7 +24,8 @@ EXE_INC = \
     -I$(CFDEM_LIGGGHTS_SRC_DIR)
 
 EXE_LIBS = \
-    -L$(CFDEM_USER_LIB_DIR)\
+    -L$(CFDEM_USER_LIB_DIR) \
+    -L$(CFDEM_LIB_DIR) \
     -l2phaseCFDEMiB-5.x \
     $(CFDEM_ADD_INCOMPTURBMOD_LIBS) \
     -limmiscibleIncompressibleTwoPhaseMixture \

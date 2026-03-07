@@ -1,0 +1,40 @@
+ITEM: TIMESTEP
+0
+ITEM: NUMBER OF ATOMS
+1
+ITEM: BOX BOUNDS ff ff ff
+0 1
+0 1
+0 4
+ITEM: ATOMS id type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius 
+1 1 0.5 0.5 3.5 0 0 0 0 0 -0.5 0 0 -59.8077 0 0 0 0.0835 
+ITEM: TIMESTEP
+100
+ITEM: NUMBER OF ATOMS
+1
+ITEM: BOX BOUNDS ff ff ff
+0 1
+0 1
+0 4
+ITEM: ATOMS id type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius 
+1 1 0.5 0.5 3.49846 0 0 0 1.14649e-08 1.03491e-08 -0.528802 -3.49423e-05 -3.46844e-05 -59.6569 0 0 0 0.0835 
+ITEM: TIMESTEP
+200
+ITEM: NUMBER OF ATOMS
+1
+ITEM: BOX BOUNDS ff ff ff
+0 1
+0 1
+0 4
+ITEM: ATOMS id type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius 
+1 1 0.5 0.5 3.49683 0 0 0 3.4853e-09 2.64603e-09 -0.558171 -7.64168e-06 -7.19359e-06 -59.6956 0 0 0 0.0835 
+ITEM: TIMESTEP
+300
+ITEM: NUMBER OF ATOMS
+1
+ITEM: BOX BOUNDS ff ff ff
+0 1
+0 1
+0 4
+ITEM: ATOMS id type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius 
+1 1 0.5 0.5 3.49511 0 0 0 -3.43955e-10 -1.10074e-09 -0.587549 -8.2004e-06 -7.99906e-06 -59.7048 0 0 0 0.0835 

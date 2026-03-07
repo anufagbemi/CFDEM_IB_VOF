@@ -41,7 +41,7 @@ SourceFiles
 #ifndef cfdemCloudIB_H
 #define cfdemCloudIB_H
 
-#include "fvCFD.H"  
+#include "fvCFD.H"    
 
 #include "cfdemCloud.H"
 
@@ -77,6 +77,7 @@ protected:
     //for refinement - needed to ensure correct probing around the interface
     volScalarField*     frontMeshRefineField_;
     bool                frontMeshRefine_;
+
 
 public:
 
@@ -121,6 +122,8 @@ public:
         double getTortuosity(vector dir);
 
        void setRefinementField(volScalarField* refine_); //this pointer is meant for a field that is used refinement outside of the cloud. can point to the same field as interFace
+
+       //const volScalarField& rhoField();    // const;     
 
 };
 

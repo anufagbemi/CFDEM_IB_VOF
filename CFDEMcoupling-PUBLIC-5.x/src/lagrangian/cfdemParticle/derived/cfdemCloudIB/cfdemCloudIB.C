@@ -68,6 +68,21 @@ cfdemCloudIB::cfdemCloudIB
     calculateTortuosity_(false),
     frontMeshRefine_(false)
 
+    /*
+    rho_
+    (
+        IOobject
+        (
+            "rho",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        ),
+        mesh
+    )
+        */
+
 
 {
     if(this->couplingProperties().found("skipLagrangeToEulerMapping"))
@@ -309,7 +324,7 @@ void Foam::cfdemCloudIB::calcVelocityCorrection
 
     // correct the pressure as well
     //p=p/rho+phiIB/U.mesh().time().deltaT();                               // do we have to  account for rho here?
-    volScalarField rho_ = mesh_.lookupObject<volScalarField>("rho");       
+    volScalarField rho_ = mesh_.lookupObject<volScalarField>("rho");        
     p=p + (phiIB/U.mesh().time().deltaT())*rho_;
 
     p.correctBoundaryConditions();

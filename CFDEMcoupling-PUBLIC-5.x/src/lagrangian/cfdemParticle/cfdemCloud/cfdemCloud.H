@@ -555,6 +555,8 @@ public:
     // functions
         tmp<fvVectorMatrix> divVoidfractionTau(volVectorField& ,volScalarField&) const;
 
+	tmp<fvVectorMatrix> divVoidfractionTau2Phase(volVectorField& ,volScalarField&) const;  
+
         tmp<volScalarField> ddtVoidfraction() const;
 
         void calcDdtVoidfraction(volScalarField& voidfraction, volVectorField& Us) const;

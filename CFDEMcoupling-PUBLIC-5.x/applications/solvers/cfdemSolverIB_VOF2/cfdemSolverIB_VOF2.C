@@ -25,20 +25,20 @@ License
     along with CFDEMcoupling.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    cfdemSolverIB_VOF
+    cfdemSolverIB
 
 Description
-    Transient solver for two phase flow.
-    The code is an evolution of the solver pimpleFoam in OpenFOAM(R) 1.6, 
+    Transient solver for incompressible flow.
+    The code is an evolution of the solver pisoFoam in OpenFOAM(R) 1.6, 
     where additional functionality for CFD-DEM coupling using immersed body
     (fictitious domain) method is added.
 Contributions
     Alice Hager
-    Samuel Fagbemi
 \*---------------------------------------------------------------------------*/
 
 
 #include "fvCFD.H"
+//#include "singlePhaseTransportModel.H"
 #include "CMULES.H"
 #include "EulerDdtScheme.H"
 #include "subCycle.H"
@@ -62,10 +62,15 @@ Contributions
 
 #if defined(version30)
     #include "turbulentTransportModel.H"
+    //#include "pisoControl.H"
+   // #include "createTimeControls.H"
 #else
     #include "turbulenceModel.H"
 #endif
 #include "cfdemCloudIB.H"
+//#if defined(superquadrics_flag)
+//#include "cfdemCloudIBSuperquadric.H"
+//#endif
 #include "implicitCouple.H"
 
 #include "averagingModel.H"
@@ -91,6 +96,7 @@ int main(int argc, char *argv[])
     #include "createDynamicFvMesh.H"
 
     #if defined(version30)
+        //pisoControl piso(mesh);
         #include "createPimpleControl.H"
         #include "createMRF.H"
         #include "createTimeControls.H"
@@ -100,12 +106,14 @@ int main(int argc, char *argv[])
     #include "initContinuityErrs.H"
     #include "createAlphaFluxes.H"
     #include "createFvOptions.H"
+//#include "correctPhi.H:"
 
     #if defined(version22)
         #include "createFvOptions.H"
     #endif
 
     // create cfdemCloud
+    //#include "readGravitationalAcceleration.H"
     #if defined(superquadrics_flag)
         cfdemCloudIBSuperquadric particleCloud(mesh);
     #else
@@ -130,10 +138,12 @@ int main(int argc, char *argv[])
             #include "CourantNo.H"
             #include "setDeltaT.H"
         #else
+            //#include "readPISOControls.H"
             #include "pimpleControl.H"
             #include "CourantNo.H"
         #endif
 
+        // do particle stuff
         //Info << "- evolve()" << endl;
         particleCloud.evolve(voidfraction, interFace);
 
@@ -156,9 +166,9 @@ int main(int argc, char *argv[])
 
                 fvVectorMatrix UEqn
                 (
-                    fvm::ddt(rho, U) 
+                    fvm::ddt(rho, U) //fvm::ddt(voidfraction,U)
                   + fvm::div(rhoPhi, U)
-                  + MRF.DDt(rho, U)                
+                  + MRF.DDt(rho, U)                // Not used in unresolved
                   + turbulence->divDevRhoReff(rho, U)
                     #if defined(version22)
                     ==
@@ -205,10 +215,10 @@ int main(int argc, char *argv[])
                     volScalarField rUA = 1.0/UEqn.A();
                     surfaceScalarField rUAf(fvc::interpolate(rUA));
 
-                    volVectorField HbyA(constrainHbyA(rUA*UEqn.H(), U, pd));  
+                    volVectorField HbyA(constrainHbyA(rUA*UEqn.H(), U, pd));    // NEW !!
 
                     #ifdef version23
-                    surfaceScalarField phiHbyA            
+                    surfaceScalarField phiHbyA              //NEW !!
                     (
                         "phiHbyA",
                         fvc::flux(HbyA)

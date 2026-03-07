@@ -1,0 +1,1114 @@
+thermo_log      ../DEM/post/thermo.txt
+
+atom_style      granular
+atom_modify     map array
+communicate     single vel yes
+
+boundary        f f f
+newton          off
+
+units           si
+processors      2 2 1
+
+region          reg block 0. 1. 0. 1. 0. 4. units box
+create_box      1 reg
+Created orthogonal box = (0 0 0) to (1 1 4)
+  2 by 2 by 1 MPI processor grid
+
+neighbor        0.3 bin
+neigh_modify    delay 0 binsize 0.01
+
+
+# Material properties required for new pair styles
+
+fix             m1 all property/global youngsModulus peratomtype 5.e7
+fix             m2 all property/global poissonsRatio peratomtype 0.45
+fix             m3 all property/global coefficientRestitution peratomtypepair 1 0.9
+fix             m4 all property/global coefficientFriction peratomtypepair 1 0.5
+
+# pair style
+pair_style      gran model hertz tangential history #Hertzian without cohesion
+pair_coeff      * *
+
+# timestep, gravity
+timestep        0.00003
+
+fix             gravi all gravity 9.81 vector 0.0 0.0 -1.0
+
+# walls
+fix     xwalls1 all wall/gran model hertz tangential history primitive type 1 xplane 0.
+fix     xwalls2 all wall/gran model hertz tangential history primitive type 1 xplane 1.
+fix     ywalls1 all wall/gran model hertz tangential history primitive type 1 yplane 0.
+fix     ywalls2 all wall/gran model hertz tangential history primitive type 1 yplane 1.
+fix     zwalls1 all wall/gran model hertz tangential history primitive type 1 zplane 0.
+fix     zwalls2 all wall/gran model hertz tangential history primitive type 1 zplane 4.
+
+# cfd coupling
+fix     cfd  all couple/cfd couple_every 10 mpi
+couple_every as specified in LIGGGHTS is overriden by calling external program (../fix_cfd_coupling.cpp:114)
+fix     cfd2 all couple/cfd/force
+
+
+# create single partciles
+create_atoms 1 single .5 .5 3.5  units box
+Created 1 atoms
+#create_atoms 1 single .5 .5 3.16 units box
+set atom 1 diameter 0.167 density 2500 vx 0 vy 0 vz -0.5
+  1 settings made for diameter
+  1 settings made for density
+  1 settings made for vx
+  1 settings made for vy
+  1 settings made for vz
+set atom 2 diameter 0.167 density 1.5 vx 0 vy 0 vz 0
+  0 settings made for diameter
+  0 settings made for density
+  0 settings made for vx
+  0 settings made for vy
+  0 settings made for vz
+
+variable        vx1 equal vx[1]
+variable        vy1 equal vy[1]
+variable        vz1 equal vz[1]
+variable        vx2 equal vx[2]
+variable        vy2 equal vy[2]
+variable        vz2 equal vz[2]
+variable        x1 equal x[1]
+variable        y1 equal y[1]
+variable        z1 equal z[1]
+variable        x2 equal x[2]
+variable        y2 equal y[2]
+variable        z2 equal z[2]
+variable        time equal step*dt
+
+fix             extra1 all print 100 "${time} ${vx1} ${vy1} ${vz1}" file ../DEM/post/velocity_particle_1.txt title "%" screen no
+fix             extra2 all print 100 "${time} ${vx2} ${vy2} ${vz2}" file ../DEM/post/velocity_particle_2.txt title "%" screen no
+fix             extra3 all print 100 "${time} ${x1}  ${y1}  ${z1}"  file ../DEM/post/position_particle_1.txt title "%" screen no
+fix             extra4 all print 100 "${time} ${x2}  ${y2}  ${z2}"  file ../DEM/post/position_particle_2.txt title "%" screen no
+
+
+# apply nve integration to all particles that are inserted as single particles
+fix             integr all nve/sphere #wenn das ausgeblendet, dann kein vel update
+
+# screen output
+compute         rke all erotate/sphere
+thermo_style    custom step atoms ke c_rke vol
+thermo          1000
+thermo_modify   lost ignore norm no
+compute_modify  thermo_temp dynamic yes
+WARNING: Changing thermo_temp compute object. This object is deprecated and will be removed in the future. (../compute.cpp:161)
+
+# insert the first particles so that dump is not empty
+dump            dmp all custom 100 ../DEM/post/dump.liggghts_run id type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius
+
+#force : f_couple_cfd[0] f_couple_cfd[1] f_couple_cfd[2]
+#node : f_couple_cfd[6]
+#cell id : f_couple_cfd[7]
+
+run             1
+Setting up run at Sat Mar  7 02:15:18 2026
+
+Memory usage per processor = 47.8413 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+       0        1      0.7620756              0              4 
+       1        1     0.76297298              0              4 
+Loop time of 8.49515e-05 on 4 procs for 1 steps with 1 atoms, finish time Sat Mar  7 02:15:18 2026
+
+
+Pair  time (%) = 1.97475e-06 (2.32456)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.5075e-06 (4.12883)
+Outpt time (%) = 9.10425e-06 (10.717)
+Other time (%) = 7.0365e-05 (82.8296)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+
+run 10    
+Setting up run at Sat Mar  7 02:15:18 2026
+
+Memory usage per processor = 47.8413 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+       1        1     0.76297298              0              4 
+CFD Coupling established at step 10
+      11        1     0.77197582              0              4 
+Loop time of 0.000302568 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:18 2026
+
+
+Pair  time (%) = 5.13e-06 (1.69549)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000100588 (33.2448)
+Outpt time (%) = 9.99175e-06 (3.30232)
+Other time (%) = 0.000186858 (61.7574)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:18 2026
+
+Memory usage per processor = 47.8413 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+      11        1     0.77197582              0              4 
+CFD Coupling established at step 20
+      21        1     0.77969665              0              4 
+Loop time of 0.000237378 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:18 2026
+
+
+Pair  time (%) = 3.5675e-06 (1.50288)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 1.05535e-05 (4.44586)
+Outpt time (%) = 9.88543e-05 (41.6442)
+Other time (%) = 0.000124403 (52.407)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:18 2026
+
+Memory usage per processor = 47.8413 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+      21        1     0.77969665              0              4 
+CFD Coupling established at step 30
+      31        1     0.78873475              0              4 
+Loop time of 0.000180376 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:18 2026
+
+
+Pair  time (%) = 3.21425e-06 (1.78197)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 1.01318e-05 (5.617)
+Outpt time (%) = 6.014e-05 (33.3414)
+Other time (%) = 0.00010689 (59.2597)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+      31        1     0.78873475              0              4 
+CFD Coupling established at step 40
+      41        1     0.79768741              0              4 
+Loop time of 0.000173342 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 3.85275e-06 (2.22262)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 2.19523e-05 (12.6641)
+Outpt time (%) = 5.2676e-05 (30.3884)
+Other time (%) = 9.48615e-05 (54.7249)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+      41        1     0.79768741              0              4 
+CFD Coupling established at step 50
+      51        1     0.80673519              0              4 
+Loop time of 0.000202429 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 3.26775e-06 (1.61427)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 4.07842e-05 (20.1475)
+Outpt time (%) = 6.8904e-05 (34.0386)
+Other time (%) = 8.94728e-05 (44.1996)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+      51        1     0.80673519              0              4 
+CFD Coupling established at step 60
+      61        1       0.815918              0              4 
+Loop time of 0.000196167 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 3.3295e-06 (1.69728)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 4.45802e-05 (22.7257)
+Outpt time (%) = 1.3088e-05 (6.67187)
+Other time (%) = 0.000135169 (68.9052)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+      61        1       0.815918              0              4 
+CFD Coupling established at step 70
+      71        1     0.82518639              0              4 
+Loop time of 0.000271256 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 3.762e-06 (1.38688)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 1.03763e-05 (3.82526)
+Outpt time (%) = 0.000108136 (39.8649)
+Other time (%) = 0.000148982 (54.923)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+      71        1     0.82518639              0              4 
+CFD Coupling established at step 80
+      81        1     0.83451671              0              4 
+Loop time of 0.000167946 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 3.233e-06 (1.92502)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 2.5286e-05 (15.056)
+Outpt time (%) = 6.03633e-05 (35.9421)
+Other time (%) = 7.90637e-05 (47.0769)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+      81        1     0.83451671              0              4 
+CFD Coupling established at step 90
+      91        1     0.84390458              0              4 
+Loop time of 0.000183591 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 6.09475e-06 (3.31975)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 4.43435e-05 (24.1534)
+Outpt time (%) = 5.954e-05 (32.4308)
+Other time (%) = 7.36125e-05 (40.096)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+      91        1     0.84390458              0              4 
+CFD Coupling established at step 100
+     101        1     0.85334757              0              4 
+Loop time of 0.00026883 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 3.46075e-06 (1.28734)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.11025e-05 (11.5696)
+Outpt time (%) = 3.00887e-05 (11.1925)
+Other time (%) = 0.000204178 (75.9506)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     101        1     0.85334757              0              4 
+CFD Coupling established at step 110
+     111        1     0.86284479              0              4 
+Loop time of 0.000168453 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 3.24075e-06 (1.92383)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.74955e-05 (22.2587)
+Outpt time (%) = 6.01575e-05 (35.7117)
+Other time (%) = 6.75595e-05 (40.1058)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     111        1     0.86284479              0              4 
+CFD Coupling established at step 120
+     121        1     0.87239569              0              4 
+Loop time of 0.000167222 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 3.5485e-06 (2.12204)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.68202e-05 (22.0188)
+Outpt time (%) = 5.9193e-05 (35.398)
+Other time (%) = 6.76597e-05 (40.4612)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     121        1     0.87239569              0              4 
+CFD Coupling established at step 130
+     131        1     0.88199988              0              4 
+Loop time of 0.00019824 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 3.61025e-06 (1.82115)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 4.72558e-05 (23.8376)
+Outpt time (%) = 6.10027e-05 (30.7721)
+Other time (%) = 8.63715e-05 (43.5691)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     131        1     0.88199988              0              4 
+CFD Coupling established at step 140
+     141        1     0.89165728              0              4 
+Loop time of 0.000177981 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 3.17925e-06 (1.78629)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 2.88205e-05 (16.193)
+Outpt time (%) = 1.3843e-05 (7.77781)
+Other time (%) = 0.000132138 (74.2429)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     141        1     0.89165728              0              4 
+CFD Coupling established at step 150
+     151        1     0.90136778              0              4 
+Loop time of 0.000177524 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 3.62725e-06 (2.04325)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 2.9428e-05 (16.5769)
+Outpt time (%) = 1.30813e-05 (7.36873)
+Other time (%) = 0.000131387 (74.0111)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     151        1     0.90136778              0              4 
+CFD Coupling established at step 160
+     161        1     0.91113127              0              4 
+Loop time of 0.000176757 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 3.6525e-06 (2.0664)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 2.9235e-05 (16.5397)
+Outpt time (%) = 1.38285e-05 (7.82345)
+Other time (%) = 0.000130041 (73.5705)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     161        1     0.91113127              0              4 
+CFD Coupling established at step 170
+     171        1     0.92094772              0              4 
+Loop time of 0.00017222 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 3.12e-06 (1.81164)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 2.07127e-05 (12.0269)
+Outpt time (%) = 5.27475e-05 (30.628)
+Other time (%) = 9.56398e-05 (55.5335)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     171        1     0.92094772              0              4 
+CFD Coupling established at step 180
+     181        1     0.93081707              0              4 
+Loop time of 0.000174822 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 3.219e-06 (1.8413)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 2.91278e-05 (16.6614)
+Outpt time (%) = 1.33905e-05 (7.65951)
+Other time (%) = 0.000129085 (73.8378)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:19 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     181        1     0.93081707              0              4 
+CFD Coupling established at step 190
+     191        1     0.94073929              0              4 
+Loop time of 0.00169391 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:19 2026
+
+
+Pair  time (%) = 5.10975e-06 (0.301655)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000564614 (33.332)
+Outpt time (%) = 0.000438853 (25.9077)
+Other time (%) = 0.000685331 (40.4586)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     191        1     0.94073929              0              4 
+CFD Coupling established at step 200
+     201        1     0.95071435              0              4 
+Loop time of 0.000278799 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 3.9125e-06 (1.40334)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 2.46045e-05 (8.82517)
+Outpt time (%) = 2.88488e-05 (10.3475)
+Other time (%) = 0.000221434 (79.424)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     201        1     0.95071435              0              4 
+CFD Coupling established at step 210
+     211        1     0.96074223              0              4 
+Loop time of 0.000125206 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 3.3625e-06 (2.68558)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 2.46952e-05 (19.7237)
+Outpt time (%) = 5.02063e-05 (40.099)
+Other time (%) = 4.69418e-05 (37.4917)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     211        1     0.96074223              0              4 
+CFD Coupling established at step 220
+     221        1     0.97082293              0              4 
+Loop time of 0.000159693 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 6.8425e-06 (4.28478)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 1.28252e-05 (8.03119)
+Outpt time (%) = 7.1537e-05 (44.7966)
+Other time (%) = 6.84882e-05 (42.8874)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     221        1     0.97082293              0              4 
+CFD Coupling established at step 230
+     231        1     0.98095646              0              4 
+Loop time of 0.000259592 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 4.90425e-06 (1.88922)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 2.9684e-05 (11.4349)
+Outpt time (%) = 7.00003e-05 (26.9655)
+Other time (%) = 0.000155003 (59.7104)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     231        1     0.98095646              0              4 
+CFD Coupling established at step 240
+     241        1     0.99114275              0              4 
+Loop time of 0.00137832 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 5.57475e-06 (0.40446)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.35485e-05 (2.43401)
+Outpt time (%) = 0.00101659 (73.7558)
+Other time (%) = 0.000322606 (23.4058)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     241        1     0.99114275              0              4 
+CFD Coupling established at step 250
+     251        1      1.0013818              0              4 
+Loop time of 0.00016329 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 4.55075e-06 (2.78692)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 1.13125e-05 (6.92787)
+Outpt time (%) = 6.54715e-05 (40.0953)
+Other time (%) = 8.1955e-05 (50.1899)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     251        1      1.0013818              0              4 
+CFD Coupling established at step 260
+     261        1      1.0116736              0              4 
+Loop time of 0.00022683 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 4.711e-06 (2.07689)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.16e-05 (13.9312)
+Outpt time (%) = 6.49533e-05 (28.6352)
+Other time (%) = 0.000125566 (55.3567)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     261        1      1.0116736              0              4 
+CFD Coupling established at step 270
+     271        1      1.0220181              0              4 
+Loop time of 0.000219531 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 4.6485e-06 (2.11747)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 2.80992e-05 (12.7997)
+Outpt time (%) = 6.3865e-05 (29.0916)
+Other time (%) = 0.000122918 (55.9912)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     271        1      1.0220181              0              4 
+CFD Coupling established at step 280
+     281        1      1.0324154              0              4 
+Loop time of 0.00111718 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 4.8115e-06 (0.430682)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000202171 (18.0966)
+Outpt time (%) = 8.23963e-05 (7.37536)
+Other time (%) = 0.000827803 (74.0974)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     281        1      1.0324154              0              4 
+CFD Coupling established at step 290
+     291        1      1.0428653              0              4 
+Loop time of 5.72927e-05 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 3.669e-06 (6.40395)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 1.2907e-05 (22.5282)
+Outpt time (%) = 7.07825e-06 (12.3545)
+Other time (%) = 3.36385e-05 (58.7134)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     291        1      1.0428653              0              4 
+CFD Coupling established at step 300
+     301        1      1.0533681              0              4 
+Loop time of 0.000142464 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 3.19425e-06 (2.24215)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 1.09865e-05 (7.71179)
+Outpt time (%) = 2.92092e-05 (20.5029)
+Other time (%) = 9.90738e-05 (69.5431)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     301        1      1.0533681              0              4 
+CFD Coupling established at step 310
+     311        1      1.0639236              0              4 
+Loop time of 5.6184e-05 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 3.04575e-06 (5.42103)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 1.23173e-05 (21.9231)
+Outpt time (%) = 6.933e-06 (12.3398)
+Other time (%) = 3.3888e-05 (60.3161)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     311        1      1.0639236              0              4 
+CFD Coupling established at step 320
+     321        1      1.0745318              0              4 
+Loop time of 5.52902e-05 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 2.957e-06 (5.34814)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 1.19152e-05 (21.5504)
+Outpt time (%) = 7.04275e-06 (12.7378)
+Other time (%) = 3.33752e-05 (60.3637)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     321        1      1.0745318              0              4 
+CFD Coupling established at step 330
+     331        1      1.0851928              0              4 
+Loop time of 6.06307e-05 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 4.58675e-06 (7.56506)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 1.30287e-05 (21.4887)
+Outpt time (%) = 6.76625e-06 (11.1598)
+Other time (%) = 3.6249e-05 (59.7865)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     331        1      1.0851928              0              4 
+CFD Coupling established at step 340
+     341        1      1.0959064              0              4 
+Loop time of 5.50055e-05 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 3.13275e-06 (5.69534)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 1.17547e-05 (21.3701)
+Outpt time (%) = 7.2065e-06 (13.1014)
+Other time (%) = 3.29115e-05 (59.8331)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0
+run 10    
+Setting up run at Sat Mar  7 02:15:20 2026
+
+Memory usage per processor = 51.8086 Mbytes
+    Step    Atoms         KinEng            rke         Volume 
+     341        1      1.0959064              0              4 
+CFD Coupling established at step 350
+     351        1      1.1066728              0              4 
+Loop time of 5.47902e-05 on 4 procs for 10 steps with 1 atoms, finish time Sat Mar  7 02:15:20 2026
+
+
+Pair  time (%) = 3.06275e-06 (5.58995)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 1.1652e-05 (21.2666)
+Outpt time (%) = 6.931e-06 (12.6501)
+Other time (%) = 3.31445e-05 (60.4934)
+
+Nlocal:    0.25 ave 1 max 0 min
+Histogram: 3 0 0 0 0 0 0 0 0 1
+Nghost:    0.75 ave 1 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 3
+Neighs:    0 ave 0 max 0 min
+Histogram: 4 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0

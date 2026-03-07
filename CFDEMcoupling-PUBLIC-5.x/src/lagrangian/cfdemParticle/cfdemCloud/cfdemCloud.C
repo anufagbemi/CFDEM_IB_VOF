@@ -912,6 +912,16 @@ tmp<fvVectorMatrix> cfdemCloud::divVoidfractionTau(volVectorField& U,volScalarFi
       - fvc::div(voidfractionNuEff(voidfraction)*dev2(fvc::grad(U)().T()))   //kinematic viscosity
     );
 }
+/*
+tmp<fvVectorMatrix> cfdemCloud::divVoidfractionTau2Phase(volVectorField& U,volScalarField& voidfraction) const
+{
+    return
+    (
+      - fvm::laplacian(voidfractionMuEff(voidfraction), U)
+      - fvc::div(voidfractionMuEff(voidfraction)*dev2(fvc::grad(U)().T()))   //Dynamic viscosity
+    );
+}
+*/
 
 tmp<volScalarField> cfdemCloud::ddtVoidfraction() const
 {
